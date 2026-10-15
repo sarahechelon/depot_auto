@@ -1,0 +1,1 @@
+"""Depot application package."""

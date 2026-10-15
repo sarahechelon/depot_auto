@@ -4,12 +4,11 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.db import get_session
+from app.db import get_session, make_engine
 from app.main import create_app
-from app.models import product  # noqa: F401 - register table metadata
+from app.models import order, product  # noqa: F401 - register table metadata
 from app.models.base import Base
 
 TEST_DB_FILE = "./test_depot.db"
@@ -21,7 +20,7 @@ def engine():
     """Per-test-session engine; creates schema once and tears the file down."""
     if os.path.exists(TEST_DB_FILE):
         os.remove(TEST_DB_FILE)
-    eng = create_engine(TEST_DB_URL, future=True)
+    eng = make_engine(TEST_DB_URL)
     Base.metadata.create_all(bind=eng)
     try:
         yield eng

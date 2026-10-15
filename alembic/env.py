@@ -8,7 +8,7 @@ from alembic import context
 
 # Import Base and models so metadata is populated for autogenerate-style use.
 from app.db import database_url
-from app.models import product  # noqa: F401 - register product table
+from app.models import order, product  # noqa: F401 - register tables on metadata
 from app.models.base import Base
 
 config = context.config

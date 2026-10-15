@@ -16,6 +16,14 @@ class NotFoundError(Exception):
     """Raised when a product does not exist."""
 
 
+class InUseError(Exception):
+    """Raised when a product cannot be deleted because something references it."""
+
+    def __init__(self, sku: str) -> None:
+        super().__init__(sku)
+        self.sku = sku
+
+
 def get_product(session: Session, sku: str) -> Product | None:
     """Return a product by SKU, or None if missing."""
     return session.get(Product, sku)
@@ -61,11 +69,14 @@ def update_product(session: Session, sku: str, data: ProductUpdate) -> Product:
 
 
 def delete_product(session: Session, sku: str) -> None:
-    """Delete a product. Raises NotFoundError if missing."""
+    """Delete a product. Raises NotFoundError if missing; InUseError if any
+    order_line references the sku (FK violation)."""
     product = session.get(Product, sku)
     if product is None:
         raise NotFoundError(sku)
-    # NOTE: order_line.sku FK will block deletion once Story 2 lands; until then
-    # this is a plain delete. A future PR can introduce InUseError on FK conflict.
     session.delete(product)
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as exc:
+        session.rollback()
+        raise InUseError(sku) from exc

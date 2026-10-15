@@ -52,8 +52,10 @@ def update_product(
 
 @router.delete("/{sku}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(sku: str, session: Session = Depends(get_session)) -> None:
-    """Delete a product. Returns 404 if missing."""
+    """Delete a product. Returns 404 if missing; 409 if referenced by orders."""
     try:
         service.delete_product(session, sku)
     except service.NotFoundError as exc:
         raise HTTPException(status_code=404, detail=f"sku '{sku}' not found") from exc
+    except service.InUseError as exc:
+        raise HTTPException(status_code=409, detail=f"sku '{sku}' is referenced by orders") from exc

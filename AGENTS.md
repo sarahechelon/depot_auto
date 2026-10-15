@@ -19,6 +19,7 @@ Actions for CI.
   filename.
 - Never delete or rewrite existing tests to make them pass. Add new ones
   alongside.
+- Money fields use integer cents. No `Decimal` or `float` for prices.
 - `make test`, `make lint`, `make run` must always succeed on `master`.
 
 ## Workflow

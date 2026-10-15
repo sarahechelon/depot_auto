@@ -1,9 +1,12 @@
 UV ?= uv
 
-.PHONY: sync test lint run
+.PHONY: sync migrate test lint run
 
 sync:
 	$(UV) sync --all-groups
+
+migrate:
+	$(UV) run alembic upgrade head
 
 test:
 	$(UV) run pytest

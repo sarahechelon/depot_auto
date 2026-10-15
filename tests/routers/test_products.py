@@ -76,3 +76,23 @@ def test_delete_product(client: TestClient) -> None:
     response = client.delete("/products/ABC")
     assert response.status_code == 204
     assert client.get("/products/ABC").status_code == 404
+
+
+def test_delete_product_referenced_by_order_returns_409(
+    client: TestClient,
+) -> None:
+    """FK enforcement must fire: deleting a product referenced by an order
+    line returns 409 and leaves the product intact."""
+    client.post(
+        "/products",
+        json={"sku": "ABC", "name": "Foo", "price": 100, "stock_qty": 10},
+    )
+    order_resp = client.post(
+        "/orders",
+        json={"customer_email": "a@b.com", "lines": [{"sku": "ABC", "quantity": 1}]},
+    )
+    assert order_resp.status_code == 201
+    response = client.delete("/products/ABC")
+    assert response.status_code == 409
+    # Product should still exist.
+    assert client.get("/products/ABC").status_code == 200

@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 
-from app.routers import health, products
+from app.routers import health, orders, products
 
 
 def create_app() -> FastAPI:
@@ -10,6 +10,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Depot", version="0.0.0")
     app.include_router(health.router)
     app.include_router(products.router)
+    app.include_router(orders.router)
     return app
 
 
